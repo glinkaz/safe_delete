@@ -1,7 +1,10 @@
 #!/bin/bash
 
 script=$(readlink -f "$0")
-(crontab -l 2>/dev/null; echo "* 9,21 * * * \"$script\"") | crontab -
+if ! crontab -l | grep -q "sdel.sh"
+then
+    (crontab -l 2>/dev/null; echo "* 9,21 * * * \"$script\"") | crontab -
+fi
 
 current_time=$(date +%s)
 
@@ -23,10 +26,10 @@ for arg in "$@"
 do
     if [ $(file -b --mime-type $arg) != "application/gzip" ]
     then
-        $(gzip $arg)
-        mv $arg.gz ~/TRASH
+        $(tar -zcf $arg.tar.gz $arg)
+        rm -r $arg
+        mv $arg.tar.gz ~/TRASH
     else
         mv $arg ~/TRASH
     fi
 done
-
